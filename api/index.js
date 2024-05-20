@@ -7,6 +7,7 @@ const bcrypt = require("bcryptjs")
 const salt = bcrypt.genSaltSync(10)
 const User = require('./models/userModel')
 const jwt = require('jsonwebtoken')
+const cookieParser = require('cookie-parser')
 
 // app initiation
 const app = express()
@@ -17,6 +18,7 @@ app.use(cors({
     origin: 'http://localhost:5173'
 }))
 app.use(bodyParser.json())
+app.use(cookieParser())
 
 // database connection
 const connect = async () => {
@@ -43,6 +45,7 @@ app.post('/register', async (req,res) => {
     }
 })
 
+// login logic
 app.post('/login', async (req, res) => {
     const {username, password} = req.body
     if(!username || !password) {
@@ -62,6 +65,13 @@ app.post('/login', async (req, res) => {
     } catch (error) {
         console.log(error);
     }
+})
+
+// checking if user token is valid
+app.get('/profileInfo', (req, res) => {
+    const {token} = req.cookies
+    const userInfo = jwt.verify(token, process.env.secret)
+    res.json(userInfo)
 })
 
 app.listen(4000)
