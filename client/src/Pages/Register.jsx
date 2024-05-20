@@ -6,7 +6,7 @@ const Register = () => {
     const register = async (e) => {
         e.preventDefault()
         try {
-            await fetch('http://localhost:4000/register',{
+            const res = await fetch('http://localhost:4000/register',{
                 method: "POST",
                 body: JSON.stringify({
                     username,
@@ -14,9 +14,16 @@ const Register = () => {
                 }),
                 headers: {
                     "Content-Type": "application/json"
-                }})
+                }
+            })
+            if(!res.ok) {
+                alert('Registration failed')
+            }
+            const data = await res.json()
+            console.log(data);
             } catch (error) {
                 console.error(error);
+                alert("Registration failed")
             }
         }
   return (
