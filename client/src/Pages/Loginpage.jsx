@@ -1,8 +1,10 @@
 import React, { useState } from 'react'
+import {Navigate} from 'react-router-dom'
 
 const Loginpage = () => {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
+  const [redirect, setRedirect] = useState(false)
   const login = async (e) => {
     e.preventDefault()
     try {
@@ -16,6 +18,7 @@ const Loginpage = () => {
       })
       if(res.ok) {
         alert("Login successful")
+        setRedirect(true)
       }
     } catch (error) {
       console.log(error)
@@ -24,6 +27,9 @@ const Loginpage = () => {
 
   }
 
+  if(redirect){
+    return <Navigate to={'/'}/>
+  }
   return (
     <form className='login' onSubmit={login}>
         <h1>Login</h1>
