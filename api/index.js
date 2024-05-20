@@ -6,12 +6,16 @@ require("dotenv").config()
 const bcrypt = require("bcryptjs")
 const salt = bcrypt.genSaltSync(10)
 const User = require('./models/userModel')
+const jwt = require('jsonwebtoken')
 
 // app initiation
 const app = express()
 
 // middleware
-app.use(cors())
+app.use(cors({
+    credentials: true,
+    origin: 'http://localhost:5173'
+}))
 app.use(bodyParser.json())
 
 // database connection
@@ -36,6 +40,27 @@ app.post('/register', async (req,res) => {
         res.json(newUser)
     } catch (error) {
         console.error(error);
+    }
+})
+
+app.post('/login', async (req, res) => {
+    const {username, password} = req.body
+    if(!username || !password) {
+        res.json('kindly fill all the fields')
+        return
+    }
+    try {
+        const userDoc = await User.findOne({username})
+        const passOk = bcrypt.compareSync(password, userDoc.password)
+        if(passOk) {
+            // respond with jsonwebtokens
+            const token = jwt.sign({username, id:userDoc._id}, process.env.secret)
+            res.cookie('token', token).json('ok')
+        } else {
+            res.status(400).json("Wrong credentials") 
+        }
+    } catch (error) {
+        console.log(error);
     }
 })
 
