@@ -109,4 +109,9 @@ app.post('/createpost', uploadsMiddleware.single('file'), async (req, res) => {
     // req.file because thats how we named it in our form data , we could have used avatar instead
     // res.json({files: req.file})
 })
+
+app.get('/posts', async (req, res) => {
+    const posts = await Post.find()
+    res.json(posts)
+})
 app.listen(4000)
