@@ -23,6 +23,7 @@ app.use(cors({
 }))
 app.use(bodyParser.json())
 app.use(cookieParser())
+app.use('/uploads', express.static(__dirname+'/uploads'))
 
 // database connection
 const connect = async () => {
@@ -35,7 +36,7 @@ const connect = async () => {
 }
 connect()
 
-// test
+// registration route
 app.post('/register', async (req,res) => {
     const {username, password} = req.body
     try {
@@ -95,12 +96,15 @@ app.post('/createpost', uploadsMiddleware.single('file'), async (req, res) => {
     const ext = parts[parts.length - 1]
     const newPath = path + "." + ext 
     fs.renameSync(path, newPath)
+    const {token} = req.cookies
+    const userInfo = jwt.verify(token, process.env.secret)
     try {
         const newPostDoc = await Post.create({
             title,
             summary,
             content,
-            cover: newPath
+            cover: newPath,
+            author: userInfo.id
         })
         res.json(newPostDoc)
     } catch (error) {
@@ -111,7 +115,7 @@ app.post('/createpost', uploadsMiddleware.single('file'), async (req, res) => {
 })
 
 app.get('/posts', async (req, res) => {
-    const posts = await Post.find()
+    const posts = await Post.find().populate('author', ['username'])
     res.json(posts)
 })
 app.listen(4000)
