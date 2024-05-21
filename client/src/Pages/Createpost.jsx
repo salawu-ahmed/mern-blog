@@ -40,7 +40,8 @@ const Createpost = () => {
         try {
             const res = await fetch('http://localhost:4000/createpost', {
                 method: 'POST',
-                body: data
+                body: data,
+                credentials: "include"
             })
             if(res.ok){
                 setRedirect(true)
