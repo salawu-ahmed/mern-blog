@@ -57,8 +57,11 @@ app.post('/login', async (req, res) => {
         const passOk = bcrypt.compareSync(password, userDoc.password)
         if(passOk) {
             // respond with jsonwebtokens
-            const token = jwt.sign({username, id:userDoc._id}, process.env.secret)
-            res.cookie('token', token).json('ok')
+            const token = jwt.sign({username, id:userDoc._id}, process.env.secret, {expiresIn:60*60})
+            res.cookie('token', token).json({
+                id: userDoc._id,
+                username
+            })
         } else {
             res.status(400).json("Wrong credentials") 
         }
@@ -72,6 +75,11 @@ app.get('/profileInfo', (req, res) => {
     const {token} = req.cookies
     const userInfo = jwt.verify(token, process.env.secret)
     res.json(userInfo)
+})
+
+// log out functionaliy
+app.post('/logout', (req, res) => {
+    res.cookie("token", "").json("ok")
 })
 
 app.listen(4000)
