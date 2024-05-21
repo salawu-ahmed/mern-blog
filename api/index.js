@@ -11,6 +11,7 @@ const cookieParser = require('cookie-parser')
 const multer = require('multer')
 const uploadsMiddleware = multer({dest: './uploads'})
 const fs = require('fs')
+const Post = require("./models/postModel")
 
 // app initiation
 const app = express()
@@ -86,14 +87,26 @@ app.post('/logout', (req, res) => {
 })
 
 // create a new post 
-app.post('/createpost', uploadsMiddleware.single('file'), (req, res) => {
+app.post('/createpost', uploadsMiddleware.single('file'), async (req, res) => {
     const {originalname, path} = req.file
+    const {title, content, summary} = req.body
     // split allows us to split the string into an array of substrings based on a given pattern
     const parts = originalname.split('.')
     const ext = parts[parts.length - 1]
     const newPath = path + "." + ext 
     fs.renameSync(path, newPath)
+    try {
+        const newPostDoc = await Post.create({
+            title,
+            summary,
+            content,
+            cover: newPath
+        })
+        res.json(newPostDoc)
+    } catch (error) {
+        console.error(error);
+    }
     // req.file because thats how we named it in our form data , we could have used avatar instead
-    res.json({files: req.file})
+    // res.json({files: req.file})
 })
 app.listen(4000)
