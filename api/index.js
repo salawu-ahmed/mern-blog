@@ -8,6 +8,9 @@ const salt = bcrypt.genSaltSync(10)
 const User = require('./models/userModel')
 const jwt = require('jsonwebtoken')
 const cookieParser = require('cookie-parser')
+const multer = require('multer')
+const uploadsMiddleware = multer({dest: './uploads'})
+const fs = require('fs')
 
 // app initiation
 const app = express()
@@ -82,4 +85,15 @@ app.post('/logout', (req, res) => {
     res.cookie("token", "").json("ok")
 })
 
+// create a new post 
+app.post('/createpost', uploadsMiddleware.single('file'), (req, res) => {
+    const {originalname, path} = req.file
+    // split allows us to split the string into an array of substrings based on a given pattern
+    const parts = originalname.split('.')
+    const ext = parts[parts.length - 1]
+    const newPath = path + "." + ext 
+    fs.renameSync(path, newPath)
+    // req.file because thats how we named it in our form data , we could have used avatar instead
+    res.json({files: req.file})
+})
 app.listen(4000)
