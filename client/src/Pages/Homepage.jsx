@@ -8,6 +8,7 @@ const Homepage = () => {
     .then((res) => res.json())
     .then((posts) => setPosts(posts))
   }, [])
+  console.log(posts);
   return (
     <>
     {
