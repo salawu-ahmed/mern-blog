@@ -1,25 +1,38 @@
-import React, { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import React, { useContext, useEffect, useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { UserContext } from './UserContex'
 
 const Header = () => {
-    const [username, setUsername] = useState(null)
-
+    const {userInfo, setUserInfo} = useContext(UserContext)
+    const navigate = useNavigate()
+    const logout = () => {
+        fetch('http://localhost:4000/logout', {
+            method: "POST",
+            credentials: "include"
+        })
+        setUserInfo(null)
+        navigate('/login')
+    }
+    
     useEffect(() => {
         fetch('http://localhost:4000/profileInfo', {
             credentials: "include"
         })
-            .then((res) => res.json())
-            .then(data => setUsername(data.username))
+        .then((res) => res.json())
+        .then(data => setUserInfo(data))
     }, [])
+    const username = userInfo?.username
+    
+
     return (
         <header>
             <Link to="/" className='logo'>My Blog</Link>
-            <Link to='/logout'>log out</Link>
             <nav>
                 {
                     username && (
                         <>
                             <Link to={'/create'}>Create post</Link>
+                            <button onClick={logout}>log out</button>
                         </>
                     )
                 }
